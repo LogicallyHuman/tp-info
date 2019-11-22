@@ -17,6 +17,50 @@
 
 volatile int count = 0;
 
+#define DATA  2,8
+#define CLOCK  2,12
+#define LATCH   2,11
+
+void SetLEDs(char BlackTurn, char BlackCheck, char BlackWin, char WhiteTurn, char WhiteCheck, char WhiteWin, char Turn, char Connected){
+	  SetPIN(LATCH, 0);
+	  SetPIN(DATA, 0);
+	  SetPIN(CLOCK, 0);
+
+	  for (int i=0; i < 8; i++)  {
+			SetPIN(CLOCK, 0);
+
+		     if(i == 0) SetPIN(DATA, BlackTurn);
+		else if(i == 1) SetPIN(DATA, BlackCheck);
+		else if(i == 2) SetPIN(DATA, BlackWin);
+		else if(i == 3) SetPIN(DATA, Turn);
+		else if(i == 4) SetPIN(DATA, Connected);
+		else if(i == 5) SetPIN(DATA, WhiteTurn);
+		else if(i == 6) SetPIN(DATA, WhiteCheck);
+		else if(i == 7) SetPIN(DATA, WhiteWin);
+		SetPIN(CLOCK, 1);
+		SetPIN(DATA, 0);
+	  }
+		SetPIN(CLOCK, 0);
+	    SetPIN(LATCH, 1);
+
+}
+
+void InitIO(){
+	SetPINSEL(DATA, 0);
+	SetPINSEL(CLOCK, 0);
+	SetPINSEL(LATCH, 0);
+
+	SetDIR(DATA, OUTPUT);
+	SetDIR(CLOCK, OUTPUT);
+	SetDIR(LATCH, OUTPUT);
+
+	SetMODE_OD(DATA, 1);
+	SetMODE_OD(CLOCK, 1);
+	SetMODE_OD(LATCH, 1);
+
+	SetLEDs(0, 0, 0, 0, 0, 0, 0, 0);
+
+}
 
 
 
@@ -28,8 +72,29 @@ int main(void) {
 	InitMotors();
 	InitSensors();
 	InitComunication();
-/*
-	GoToOrigin();
+	InitIO();
+
+	/*while(1){
+		SetLEDs(1,0,0,0,0,0,0,0);
+		for(long i = 0; i < 1000000; i++){
+
+		}
+		SetLEDs(0,1,0,0,0,0,0,0);
+		for(long i = 0; i < 1000000; i++){
+
+		}
+		SetLEDs(0,0,1,0,0,0,0,0);
+		for(long i = 0; i < 1000000; i++){
+
+		}
+		SetLEDs(0,0,0,1,0,0,0,0);
+		for(long i = 0; i < 1000000; i++){
+
+		}
+	}*/
+
+
+	/*GoToOrigin();
 
 	SetPINSEL(2, 4, 0);
 	SetDIR(2, 4, OUTPUT);
@@ -42,6 +107,8 @@ int main(void) {
 	while(1){
 
 	}*/
+
+
 	//SetPINSEL(2, 4, 0);
 	//SetDIR(2, 4, OUTPUT);
 	//SetPIN(2, 4, 0);
@@ -51,14 +118,49 @@ int main(void) {
 
 	//}
 	//MovePiece(7,7,  2,3);
-	/*while(1){
+
+	char fromRow, fromCol, toRow, toCol;
+	UpdateOriginBoard();
+	while(1){
+		if(CheckPieces(&fromRow, &fromCol, &toRow, &toCol) == 1){
+			char str[8];
+			str[0] = fromCol + 'a';
+			str[1] = fromRow + '1';
+			str[2] = toCol + 'a';
+			str[3] = toRow + '1';
+			str[4] = '\n';
+			str[5] = '\0';
+			UART_SendStr(str);
+		}
+
+
+	}
+
+	while(1){
 		RxCommand command = PopCommand();
 		SerialComFSM();
-		if(command.command == NOT_VALID){
-			UART_SendStr("hi!\n");
+		if(command.command == MOVE){
+			char str[7];
+			str[0] = command.fromCol;
+			str[1] = command.fromRow;
+			str[2] = command.toCol;
+			str[3] = command.toRow;
+			if(command.blackCheck){
+				str[4] = 'B';
+			}
+			else if(command.whiteCheck){
+				str[4] = 'W';
+			}
+			else{
+				str[4] = '#';
+			}
+			str[5] = '\n';
+			str[6] = '\0';
+			UART_SendStr(str);
 		}
-	}*/
 
+	}
+/*
 	while(1){
 		ReadSensors();
 
@@ -76,7 +178,7 @@ int main(void) {
 		for(long i = 0; i < 5000000; i++){
 
 		}
-	}
+	}*/
 
 
 

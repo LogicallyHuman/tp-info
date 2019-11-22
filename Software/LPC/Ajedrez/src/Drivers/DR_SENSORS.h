@@ -15,6 +15,7 @@ extern char SensorValues[8];
 
 void InitSensors();
 void ReadSensors();
-
+char CheckPieces(char * fromRow, char * fromCol, char * toRow, char * toCol);
+void UpdateOriginBoard();
 
 #endif /* DRIVERS_DR_SENSORS_H_ */

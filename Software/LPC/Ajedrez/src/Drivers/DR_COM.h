@@ -14,18 +14,20 @@
 
 #define CONNECTED   0
 #define READY       1
-#define NOT_VALID   2
+#define IS_VALID    2
 #define VALID       3
-#define MOVE        4
-#define RESET       5
+#define NOT_VALID   4
+#define MOVE        5
+#define MOVED       6
 
 
 #define CONNECTED_COMMAND "CONECTADO"
 #define READY_COMMAND "LISTO"
+#define IS_VALID_COMMAND "VALIDO?"
+#define VALID_COMMAND "SIVALIDO"
 #define NOT_VALID_COMMAND "NOVALIDO"
-#define VALID_COMMAND "VALIDO"
 #define MOVE_COMMAND "MOVER"
-#define RESET_COMMAND "RESET"
+#define MOVED_COMMAND "SEMOVIO"
 
 struct RxCommand{
 	char command;

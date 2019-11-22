@@ -12,17 +12,17 @@
 
  LISTO
 
- VALIDO
+ VALIDO X
 
  NOVALIDO
 
- JAQUE_B
-
- JAQUE_N
+ SEMOVIO xXxX
 
  MOVER xXxX X  (xXxX=move  X=jaque(N/B/-))
 
  RESET
+
+
 
  */
 
@@ -47,10 +47,12 @@ RxCommand IdentifyCommand(char * CommandStr){
 
 	     if(strcmp(CommandFirstPart, CONNECTED_COMMAND) == 0)    command = CONNECTED;
 	else if(strcmp(CommandFirstPart, READY_COMMAND) == 0)        command = READY;
-	else if(strcmp(CommandFirstPart, NOT_VALID_COMMAND) == 0)    command = NOT_VALID;
+	else if(strcmp(CommandFirstPart, IS_VALID_COMMAND) == 0)     command = IS_VALID;
 	else if(strcmp(CommandFirstPart, VALID_COMMAND) == 0)        command = VALID;
+	else if(strcmp(CommandFirstPart, NOT_VALID_COMMAND) == 0)    command = NOT_VALID;
 	else if(strcmp(CommandFirstPart, MOVE_COMMAND) == 0)         command = MOVE;
-	else if(strcmp(CommandFirstPart, RESET_COMMAND) == 0)        command = RESET;
+	else if(strcmp(CommandFirstPart, MOVED_COMMAND) == 0)        command = MOVED;
+
 	else return ret;
 
 	ret.command = command;

@@ -10,7 +10,9 @@
 char SensorValues[8];
 
 const uint8_t ColumnPins[8][2] = {{PIN_A}, {PIN_B}, {PIN_C}, {PIN_D}, {PIN_E}, {PIN_F}, {PIN_G}, {PIN_H}};
-const uint8_t RowPins[8][2] = {{PIN_8}, {PIN_7}, {PIN_6}, {PIN_5}, {PIN_4}, {PIN_3}, {PIN_2}, {PIN_1}};
+const uint8_t RowPins[8][2] = {{PIN_1}, {PIN_2}, {PIN_3}, {PIN_4}, {PIN_5}, {PIN_6}, {PIN_7}, {PIN_8}};
+
+char PrevSensorValues[8];
 
 void InitSensors(){
 
@@ -24,6 +26,15 @@ void InitSensors(){
 		SetDIR      (RowPins[i][0], RowPins[i][1], INPUT);
 		SetPINMODE  (RowPins[i][0], RowPins[i][1], PINMODE_PULLDOWN);
 	}
+	ReadSensors();
+    PrevSensorValues[0] = SensorValues[0];
+    PrevSensorValues[1] = SensorValues[1];
+    PrevSensorValues[2] = SensorValues[2];
+    PrevSensorValues[3] = SensorValues[3];
+    PrevSensorValues[4] = SensorValues[4];
+    PrevSensorValues[5] = SensorValues[5];
+    PrevSensorValues[6] = SensorValues[6];
+    PrevSensorValues[7] = SensorValues[7];
 
 }
 
@@ -63,3 +74,100 @@ void ReadSensors(){
 			SetPIN(ColumnPins[row][0], ColumnPins[row][1], 0);
 		}
 }
+
+#define WAITING_FOR_LIFT 0
+#define WAITING_FOR_DROP 1
+
+void UpdateOriginBoard(){
+
+    PrevSensorValues[0] = SensorValues[0];
+    PrevSensorValues[1] = SensorValues[1];
+    PrevSensorValues[2] = SensorValues[2];
+    PrevSensorValues[3] = SensorValues[3];
+    PrevSensorValues[4] = SensorValues[4];
+    PrevSensorValues[5] = SensorValues[5];
+    PrevSensorValues[6] = SensorValues[6];
+    PrevSensorValues[7] = SensorValues[7];
+
+}
+
+char CheckPieces(char * fromRow, char * fromCol, char * toRow, char * toCol){
+
+	static char PieceRemovedRow;
+	static char PieceRemovedCol;
+	static char PiecePlacedRow;
+	static char PiecePlacedCol;
+	static char PrevPiecePlacedRow;
+	static char PrevPiecePlacedCol;
+
+	static char State = WAITING_FOR_LIFT;
+	ReadSensors();
+
+	char FoundChangedPiece = 0;
+	if(State == WAITING_FOR_LIFT){
+		for(int row = 0; row < 8; row++){
+			for(int col = 0; col < 8; col++){
+				if(((SensorValues[row]&(1<<col)) == 0) && ((PrevSensorValues[row]&(1<<col)) != 0)){
+					if(FoundChangedPiece){
+						return -1;
+					}
+					else{
+						PieceRemovedRow = row;
+						PieceRemovedCol = col;
+						FoundChangedPiece = 1;
+					}
+				}
+			}
+		}
+		if(FoundChangedPiece)State = WAITING_FOR_DROP;
+	}
+	else if(State == WAITING_FOR_DROP){
+		for(int row = 0; row < 8; row++){
+			for(int col = 0; col < 8; col++){
+				if(((SensorValues[row]&(1<<col)) != 0) && ((PrevSensorValues[row]&(1<<col)) == 0)){
+					if(FoundChangedPiece){
+						return -1;
+					}
+					else{
+						PiecePlacedRow = row;
+						PiecePlacedCol = col;
+						FoundChangedPiece = 1;
+					}
+				}
+			}
+		}
+		if(FoundChangedPiece){
+			if(PrevPiecePlacedRow == PiecePlacedRow && PrevPiecePlacedCol == PiecePlacedCol){
+				return 0;
+			}
+			else{
+				State = WAITING_FOR_LIFT;
+				*fromRow = PieceRemovedRow;
+				*fromCol = PieceRemovedCol;
+				*toRow = PiecePlacedRow;
+				*toCol = PiecePlacedCol;
+				PrevPiecePlacedRow = PiecePlacedRow;
+				PrevPiecePlacedCol = PiecePlacedCol;
+
+				return 1;
+			}
+
+		}
+	}
+	if(
+	PrevSensorValues[0] == SensorValues[0] &&
+	PrevSensorValues[1] == SensorValues[1] &&
+	PrevSensorValues[2] == SensorValues[2] &&
+	PrevSensorValues[3] == SensorValues[3] &&
+	PrevSensorValues[4] == SensorValues[4] &&
+	PrevSensorValues[5] == SensorValues[5] &&
+	PrevSensorValues[6] == SensorValues[6] &&
+	PrevSensorValues[7] == SensorValues[7]){
+		PrevPiecePlacedRow = -1;
+		PrevPiecePlacedCol = -1;
+		State = WAITING_FOR_LIFT;
+
+	}
+	return 0;
+}
+
